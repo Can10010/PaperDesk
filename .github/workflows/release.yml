@@ -31,6 +31,15 @@ jobs:
           if ($version -notmatch '^\d+\.\d+\.\d+$') { throw 'Expected a stable package version.' }
           $tag = 'v' + $version
           $repo = $env:GITHUB_REPOSITORY
+          $tagRefs = @(git ls-remote --tags origin "refs/tags/$tag" "refs/tags/$tag^{}")
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect the release tag.' }
+          if ($tagRefs.Count -gt 0) {
+            $peeled = $tagRefs | Where-Object { $_.EndsWith('^{}') } | Select-Object -First 1
+            if (!$peeled) { $peeled = $tagRefs[0] }
+            if (($peeled -split '\s+')[0] -ne $env:GITHUB_SHA) {
+              throw 'The version tag already points to another commit; bump the package version.'
+            }
+          }
           $releases = gh api "repos/$repo/releases?per_page=100" | ConvertFrom-Json
           if ($LASTEXITCODE -ne 0) { throw 'Cannot read releases.' }
           $release = $releases | Where-Object tag_name -EQ $tag | Select-Object -First 1
