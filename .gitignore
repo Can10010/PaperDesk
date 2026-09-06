@@ -1,0 +1,40 @@
+# Dependencies, generated files and local runtimes
+/node_modules/
+/dist/
+/release/
+/runtime/
+/.npm-cache/
+/.electron-cache/
+/.builder-cache/
+/.test-data/
+/.dev-data/
+
+# Private libraries, credentials, logs and operational records
+/data/
+/validation/
+/upgrade-audit/
+/验收与启动.md
+*.log
+.env
+.env.*
+!.env.example
+*.sqlite*
+*.db
+*.db-*
+*.pdsync
+*.pdf
+*.pem
+*.key
+hermes-token.txt
+
+# Only portable application scripts belong in the public repository.
+/scripts/*
+!/scripts/sync-peer.mjs
+!/scripts/hermes-mcp.mjs
+!/scripts/prepare-runtime.mjs
+
+# Local editor and OS state
+/.idea/
+/.vscode/
+.DS_Store
+Thumbs.db

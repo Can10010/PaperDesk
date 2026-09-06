@@ -1,0 +1,92 @@
+{
+  "name": "paperdesk",
+  "version": "1.1.0",
+  "description": "Local-first literature and Markdown workspace",
+  "private": true,
+  "type": "module",
+  "main": "desktop/main.cjs",
+  "author": "PaperDesk",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "start": "electron .",
+    "server": "node server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "package": "npm run build && electron-builder --win nsis zip --x64",
+    "prepare:runtime": "node scripts/prepare-runtime.mjs"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "multer": "^2.0.2",
+    "pdfjs-dist": "6.3.289",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "lucide-react": "^0.577.0",
+    "marked": "^17.0.0",
+    "dompurify": "^3.3.0"
+  },
+  "devDependencies": {
+    "electron": "44.2.0",
+    "electron-builder": "26.15.3",
+    "vite": "^7.3.1"
+  },
+  "build": {
+    "appId": "com.paperdesk.app",
+    "productName": "PaperDesk",
+    "asar": false,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "desktop/**/*",
+      "lib/**/*",
+      "scripts/sync-peer.mjs",
+      "scripts/hermes-mcp.mjs",
+      "server.mjs",
+      "dist/**/*",
+      "docs/**/*",
+      "README.md",
+      "package.json",
+      "LICENSE"
+    ],
+    "extraResources": [
+      {
+        "from": "runtime/node.exe",
+        "to": "runtime/node.exe"
+      },
+      {
+        "from": "runtime/LICENSE.node.txt",
+        "to": "runtime/LICENSE.node.txt"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ],
+      "signAndEditExecutable": false,
+      "artifactName": "PaperDesk-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "PaperDesk 文献库",
+      "deleteAppDataOnUninstall": false
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Can10010/PaperDesk.git"
+  },
+  "homepage": "https://github.com/Can10010/PaperDesk#readme",
+  "bugs": {
+    "url": "https://github.com/Can10010/PaperDesk/issues"
+  }
+}
