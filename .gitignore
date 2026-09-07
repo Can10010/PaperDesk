@@ -32,6 +32,7 @@ hermes-token.txt
 !/scripts/sync-peer.mjs
 !/scripts/hermes-mcp.mjs
 !/scripts/prepare-runtime.mjs
+!/scripts/publish-release.mjs
 
 # Local editor and OS state
 /.idea/
