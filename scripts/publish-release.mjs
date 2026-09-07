@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 const token = process.env.GH_TOKEN;
 const repository = process.env.GITHUB_REPOSITORY || '';
 const commit = process.env.RELEASE_COMMIT || '';
+const releaseDirectory = process.env.PAPERDESK_RELEASE_DIR || 'release';
 const version = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
 const tag = 'v' + version;
 const prefix = '/repos/' + repository;
@@ -61,7 +62,7 @@ async function main() {
   }
   await verifyTag();
 
-  const directory = new URL('../release/', import.meta.url);
+  const directory = new URL('../' + releaseDirectory.replace(/\\/g, '/').replace(/\/$/, '') + '/', import.meta.url);
   const names = ['PaperDesk-' + version + '-x64.exe', 'PaperDesk-' + version + '-x64.zip'];
   const files = names.map(name => {
     const location = new URL(name, directory);
