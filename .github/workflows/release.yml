@@ -21,6 +21,16 @@ jobs:
       - run: npm run prepare:runtime
       - run: npm test
       - run: npm run package
+      - name: Keep built installers for release recovery
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installers
+          path: |
+            release/*.exe
+            release/*.zip
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
       - name: Verify files and publish draft
         shell: pwsh
         env:
@@ -61,8 +71,29 @@ jobs:
           }
           [IO.File]::WriteAllLines((Join-Path $PWD 'release/SHA256SUMS.txt'), [string[]]$checksums, [Text.UTF8Encoding]::new($false))
           $assets = $files + @('release/SHA256SUMS.txt')
-          gh release upload $tag @assets --repo $repo --clobber
-          if ($LASTEXITCODE -ne 0) { throw 'Asset upload failed; release remains a draft.' }
+          $existingAssets = gh api "repos/$repo/releases/$releaseId/assets" | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect draft assets.' }
+          $uploadHeaders = @{
+            Authorization = 'Bearer ' + $env:GH_TOKEN
+            Accept = 'application/vnd.github+json'
+            'X-GitHub-Api-Version' = '2022-11-28'
+          }
+          foreach ($file in $assets) {
+            $name = [IO.Path]::GetFileName($file)
+            $digest = 'sha256:' + (Get-FileHash -Algorithm SHA256 -LiteralPath $file).Hash.ToLower()
+            $existing = $existingAssets | Where-Object name -EQ $name | Select-Object -First 1
+            if ($existing -and $existing.state -eq 'uploaded' -and $existing.digest -eq $digest) { continue }
+            if ($existing) {
+              gh api --method DELETE "repos/$repo/releases/assets/$($existing.id)" --silent
+              if ($LASTEXITCODE -ne 0) { throw "Cannot replace incomplete draft asset $name." }
+            }
+            Write-Output "Uploading $name to draft release $releaseId"
+            $uploadUrl = "https://uploads.github.com/repos/$repo/releases/$releaseId/assets?name=" + [Uri]::EscapeDataString($name)
+            $asset = Invoke-RestMethod -Method Post -Uri $uploadUrl -Headers $uploadHeaders -ContentType 'application/octet-stream' -InFile (Resolve-Path -LiteralPath $file).Path -TimeoutSec 600
+            if ($asset.state -ne 'uploaded' -or $asset.digest -ne $digest) {
+              throw "Upload checksum verification failed for $name; release remains a draft."
+            }
+          }
           $uploaded = gh api "repos/$repo/releases/$releaseId/assets" | ConvertFrom-Json
           if ($LASTEXITCODE -ne 0) { throw 'Cannot verify assets.' }
           foreach ($file in $assets) {
