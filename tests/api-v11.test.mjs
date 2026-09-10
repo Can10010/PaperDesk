@@ -5,7 +5,7 @@ test('v1.1 settings keep secrets, task routing and paper/note search scopes',asy
  t.after(async()=>{await svc.close();await new Promise(r=>mock.close(r));fs.rmSync(dir,{recursive:true,force:true});});
  let cookie='';const request=async(route,method='GET',body)=>{const res=await fetch(svc.url+route,{method,headers:{cookie,...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body)});if(res.headers.get('set-cookie'))cookie=res.headers.get('set-cookie').split(';')[0];return {status:res.status,data:await res.json()};};
  await request('/api/auth/setup','POST',{username:'接口验收',password:'1'});
- assert.equal((await request('/api/health')).data.version,'1.1.0');
+ assert.equal((await request('/api/health')).data.version,JSON.parse(fs.readFileSync(new URL('../package.json',import.meta.url),'utf8')).version);
  assert.equal((await request('/api/health')).data.dataDir,dir);
  const initial=(await request('/api/settings')).data;assert.deepEqual(initial.modelConfig.providers,[]);assert.deepEqual(initial.syncProfiles,[]);
  assert.ok(initial.hermes.scriptPath.endsWith('hermes-mcp.mjs'));

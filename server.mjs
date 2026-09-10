@@ -12,6 +12,7 @@ import {normalizeModelConfig,publicModelConfig,mergeModelConfig,resolveModelTask
 import {extractPdf,searchPapers,askPapers,buildKnowledge} from './lib/knowledge.mjs';
 
 export const rootDir=path.dirname(fileURLToPath(import.meta.url));
+const appVersion=JSON.parse(fs.readFileSync(path.join(rootDir,'package.json'),'utf8')).version;
 export function defaultDataDir(){return process.env.PAPERDESK_DATA_DIR||(process.platform==='win32'&&fs.existsSync('D:\\')?'D:\\PaperDeskData':path.join(os.homedir(),'PaperDeskData'))}
 const digest=s=>createHash('sha256').update(s).digest('hex');
 const hashPassword=(p,salt)=>scryptSync(p,salt,64).toString('hex');
@@ -44,7 +45,7 @@ export async function startServer({dataDir=defaultDataDir(),port=Number(process.
   res.setHeader('Set-Cookie','paperdesk_session='+token+'; HttpOnly; SameSite=Strict; Path=/'+(remember?'; Max-Age=31536000':''));
  }
  const failures=new Map();
- app.get('/api/health',(_,res)=>res.json({ok:true,app:'PaperDesk',version:'1.1.0',dataDir:path.resolve(dataDir)}));
+ app.get('/api/health',(_,res)=>res.json({ok:true,app:'PaperDesk',version:appVersion,dataDir:path.resolve(dataDir)}));
  app.get('/api/auth/status',(req,res)=>res.json({configured:!!vault.getAccount(),authenticated:authenticated(req),username:vault.getAccount()?.username||''}));
  app.post('/api/auth/setup',(req,res)=>{
   if(vault.getAccount())return res.status(409).json({error:'此资料库已设置账号，请登录'});
