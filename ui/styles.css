@@ -60,3 +60,18 @@ body.resizing-panels iframe{pointer-events:none}
 .markdown .katex .base{white-space:nowrap}.markdown .math-error{color:#ffacb6;white-space:pre-wrap}
 .markdown h4,.markdown h5,.markdown h6{margin:1em 0 .5em;font-weight:600}
 .markdown input[type=checkbox]{accent-color:#ad8adb}
+/* Single-area Markdown live editing. */
+.live-editor-label{display:flex;align-items:center;gap:7px;margin-right:auto;color:#c4accf;font-size:11px}
+.live-editor-container{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.live-markdown-editor{flex:1;min-height:0;min-width:0;overflow:hidden;font-size:14px;color:#d5c6dd}
+.live-markdown-editor .cm-scroller{font-family:"Segoe UI","Microsoft YaHei",sans-serif}
+.cm-rendered-block{white-space:normal;padding:0 0 8px;cursor:text;overflow-wrap:anywhere}
+.cm-rendered-block>:first-child{margin-top:0}.cm-rendered-block>:last-child{margin-bottom:0}
+.cm-rendered-block:empty{height:14px;padding:0}
+.cm-md-heading{color:#e3ccec;font-weight:600;padding-bottom:8px!important}
+.cm-md-h1{font-size:25px}.cm-md-h2{font-size:21px}.cm-md-h3{font-size:18px}
+.cm-md-h4,.cm-md-h5,.cm-md-h6{font-size:16px}.cm-md-code{font-family:Consolas,monospace;background:#231d28}
+.cm-md-active{overflow-wrap:anywhere}.live-markdown-editor .cm-placeholder{color:#8f7b9a}
+.live-markdown-editor .cm-rendered-block table{width:100%}.live-markdown-editor .cm-rendered-block pre{white-space:pre-wrap}
+.live-markdown-editor .cm-rendered-block .katex-display{margin:0;padding:10px 0}
+.live-editor-container .markdown-tools{flex-shrink:0}.live-editor-container .markdown-tools>span{margin-left:auto;font-size:9px}

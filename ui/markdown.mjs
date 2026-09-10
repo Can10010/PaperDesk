@@ -28,9 +28,15 @@ markdown.use({extensions: [{
   },
   renderer(token) { return formula(token.text, token.display); }
 }]});
+export const markdownBlocks = text => markdown.lexer(text || '');
+export function renderMarkdownBlock(token, links) { const tokens = [token]; tokens.links = links; return markdown.parser(tokens); }
 export const renderMarkdown = text => markdown.parse(text || '');
-export const markdownHelp = String.raw`## 编辑与预览
-“编辑”显示 Markdown 源码；“分栏”边写边看渲染；“预览”只显示排版。预览不是自动改写原文。
+export const markdownHelp = String.raw`## 实时编辑
+笔记只有一个编辑区域，直接点击文字即可修改，不需要切换编辑或预览模式。标题、列表、表格和公式在同一区域自动排版。
+
+与 Obsidian 的实时编辑类似：点击段落、表格或公式时显示该处的 Markdown 标记，便于精确修改；移开光标或点到其他段落后自动恢复排版。正在编辑的标题与强调文字仍有样式。
+
+Ctrl+B 加粗、Ctrl+I 斜体，Ctrl+Z 撤销、Ctrl+Y 重做；顶部工具栏可插入常用格式。Ctrl+A 可以选择整篇笔记，复制仍得到 Markdown 原文。打开笔记或移动光标不会改写、保存原文。
 
 ### 常用语法
 - 标题：行首写 \`# 标题\` 或 \`## 小标题\`，井号后留一个半角空格。
