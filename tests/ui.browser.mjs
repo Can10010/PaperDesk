@@ -89,6 +89,19 @@ $$
   await page.getByRole('button',{name:'保存',exact:true}).click();
   await page.waitForFunction(()=>document.querySelector('.note-footer')?.textContent.includes('已保存到本地'));
   assert.equal(svc.vault.readNote(second.paper.id),'Retain me after failure');
+  // A Hermes/external edit and a newer local draft must both survive conflict saving.
+  let releaseConflict, conflictEnteredResolve;
+  const conflictEntered=new Promise(r=>conflictEnteredResolve=r), conflictGate=new Promise(r=>releaseConflict=r);
+  await page.route(secondEndpoint,async route=>{if(route.request().method()==='PUT'){conflictEnteredResolve();await conflictGate;}await route.continue();});
+  await editor.fill('Local before response');await conflictEntered;
+  svc.vault.saveNote(second.paper.id,'Hermes concurrent idea');
+  await editor.fill('Latest local idea');releaseConflict();
+  await page.waitForFunction(()=>document.querySelector('.note-footer')?.textContent.includes('已保存到本地'));
+  const retained=svc.vault.readNote(second.paper.id);
+  assert.ok(retained.includes('Hermes concurrent idea'));
+  assert.ok(retained.includes('Latest local idea'));
+  assert.equal(await editor.inputValue(),retained);
+  await page.unroute(secondEndpoint);
   await page.getByRole('button',{name:'Markdown 语法与保存说明'}).click();
   assert.ok(await page.getByRole('dialog').isVisible());
   assert.equal(errors.length,0,errors.join('\n'));

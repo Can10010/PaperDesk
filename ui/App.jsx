@@ -172,10 +172,14 @@ function Workspace({ auth, onAuthChange }) {
           const saved = await api(`/api/papers/${encodeURIComponent(current.id)}/note`, {method:'PUT', body:{markdown:current.text, baseMarkdown:current.base}});
           if (selectedIdRef.current !== current.id) return false;
           const baseline = saved.markdown ?? current.text;
-          const text = saved.conflict && currentNoteRef.current.text === current.text ? baseline : currentNoteRef.current.text;
+          let text = currentNoteRef.current.text;
+          if (saved.conflict) {
+            // A newer local draft must not implicitly resolve an unseen remote conflict.
+            text = text === current.text ? baseline : baseline + '\n\n---\n\n> 保存期间继续编辑的本机内容（请整理后保存）：\n\n' + text;
+          }
           currentNoteRef.current = {...currentNoteRef.current, base:baseline, text, dirty:text !== baseline};
           setNoteBaseline(baseline);
-          if (saved.conflict && text === baseline) setNoteText(baseline);
+          if (saved.conflict) setNoteText(text);
           if (saved.conflict) notify('另一端也修改了笔记，两份内容均已保留，请整理后保存。', 'error');
           setPapers(prev => prev.map(p => p.id === current.id ? {...p, hasNote:!!baseline.trim(), updatedAt:new Date().toISOString()} : p));
           refreshSync();
